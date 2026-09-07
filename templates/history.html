@@ -1,0 +1,145 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    .stats-card {
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        backdrop-filter: blur(12px);
+    }
+    .stats-card.positive { background: rgba(18, 184, 134, 0.12); border: 2px solid rgba(18, 184, 134, 0.4); }
+    .stats-card.negative { background: rgba(245, 159, 0, 0.12);  border: 2px solid rgba(245, 159, 0, 0.4); }
+    .stats-card.neutral  { background: rgba(252, 196, 25, 0.12); border: 2px solid rgba(252, 196, 25, 0.4); }
+    .stats-card.total    { background: rgba(102, 126, 234, 0.12);border: 2px solid rgba(102, 126, 234, 0.4); }
+    .platform-badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
+    .platform-youtube   { background: #FF0000; color: white; }
+    .platform-twitter   { background: #1DA1F2; color: white; }
+    .platform-reddit    { background: #FF4500; color: white; }
+    .platform-instagram { background: #E4405F; color: white; }
+    .platform-facebook  { background: #1877F2; color: white; }
+    .platform-csv       { background: #28a745; color: white; }
+    .platform-text      { background: #6c757d; color: white; }
+    .platform-news      { background: #764ba2; color: white; }
+</style>
+
+<div class="container">
+
+    <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+        <i class="fas fa-moon" id="darkModeIcon"></i>
+        <span id="darkModeLabel">Dark</span>
+    </button>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-history me-2 text-primary"></i> Analysis History</h1>
+        <a href="/" class="btn btn-primary"><i class="fas fa-home me-1"></i> Back to Home</a>
+    </div>
+
+    {% if stats %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card total">
+                <h2>{{ stats.total_analyses }}</h2>
+                <p>Total Analyses</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card positive">
+                <h2>{{ stats.total_positive }}</h2>
+                <p>Positive</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card negative">
+                <h2>{{ stats.total_negative }}</h2>
+                <p>Negative</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card neutral">
+                <h2>{{ stats.total_neutral }}</h2>
+                <p>Neutral</p>
+            </div>
+        </div>
+    </div>
+    
+    {% if stats.platforms %}
+    <div class="mb-4">
+        <h5>Analyses by Platform</h5>
+        <div class="d-flex flex-wrap gap-2">
+            {% for p in stats.platforms %}
+            <span class="platform-badge platform-{{ p.platform }}">{{ p.platform }}: {{ p.count }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <h3>Recent Analyses</h3>
+    
+    {% if history %}
+    <div class="table-responsive history-table">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Platform</th>
+                    <th>Query</th>
+                    <th>Total</th>
+                    <th>Positive</th>
+                    <th>Negative</th>
+                    <th>Neutral</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td><span class="platform-badge platform-{{ item.platform }}">{{ item.platform }}</span></td>
+                    <td>{{ item.query[:50] if item.query else '-' }}{% if item.query and item.query|length > 50 %}...{% endif %}</td>
+                    <td>{{ item.total_count }}</td>
+                    <td class="text-success">{{ item.positive_count }}</td>
+                    <td class="text-danger">{{ item.negative_count }}</td>
+                    <td class="text-warning">{{ item.neutral_count }}</td>
+                    <td>{{ item.created_at[:19] if item.created_at else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No analysis history yet. Start by analyzing some text!
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="/" class="btn btn-primary"><i class="fas fa-plus"></i> New Analysis</a>
+    </div>
+
+</div>
+
+<script>
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const icon  = document.getElementById('darkModeIcon');
+    const label = document.getElementById('darkModeLabel');
+    if (theme === 'dark') {
+        if (icon)  icon.className   = 'fas fa-sun';
+        if (label) label.textContent = 'Light';
+    } else {
+        if (icon)  icon.className   = 'fas fa-moon';
+        if (label) label.textContent = 'Dark';
+    }
+}
+function toggleDarkMode() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+}
+applyTheme(localStorage.getItem('theme') || 'light');
+</script>

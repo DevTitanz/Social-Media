@@ -1,0 +1,6 @@
+twitter-api45.p.rapidapi.com 403 {"message":"You are not subscribed to this API."}
+twitter154.p.rapidapi.com 403 {"message":"You are not subscribed to this API."}
+twttrapi.p.rapidapi.com 403 {"message":"You are not subscribed to this API."}
+twitter-v24.p.rapidapi.com 403 {"message":"You are not subscribed to this API."}
+instagram-scraper-api2.p.rapidapi.com 403 {"message":"You are not subscribed to this API."}
+instagram-api-20231.p.rapidapi.com 404 {"message":"API doesn't exists"}

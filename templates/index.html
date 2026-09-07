@@ -1,0 +1,282 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay">
+    <div class="loader-ring"></div>
+    <div class="loader-text" id="loaderTitle">Analyzing Sentiment...</div>
+    <div class="loader-subtext" id="loaderSub">Fetching and processing data, please wait</div>
+</div>
+
+
+
+<div class="container">
+
+    <div class="header-info">
+        <h1><i class="fas fa-chart-pie platform-icon"></i>Adani Positive Media Sentiment Analyzer</h1>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/history" class="api-link"><i class="fas fa-history"></i> View History</a>
+            <button id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle Dark Mode"
+                style="background:rgba(255,255,255,0.55);border:1px solid rgba(0,0,0,0.1);border-radius:20px;padding:6px 16px;font-size:0.85rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.3s;">
+                <i class="fas fa-moon" id="darkModeIcon"></i>
+                <span id="darkModeLabel">Dark</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Model Selector ─────────────────────────────────────── -->
+    <div class="model-selector-section">
+        <div class="model-selector-label"><i class="fas fa-brain"></i> Choose Sentiment Model</div>
+        <div class="model-selector-cards">
+            <label class="model-card active" data-model="logistic_regression" id="model-card-lr">
+                <input type="radio" name="_model_switch" value="logistic_regression" checked hidden>
+                <div class="model-card-icon">📊</div>
+                <div class="model-card-body">
+                    <div class="model-card-title">Logistic Regression</div>
+                    <div class="model-card-desc">Fast &amp; lightweight — TF-IDF based ML model</div>
+                </div>
+                <div class="model-card-badge badge-fast">⚡ Fast</div>
+            </label>
+            <!--
+            <label class="model-card" data-model="roberta" id="model-card-roberta">
+                <input type="radio" name="_model_switch" value="roberta" hidden>
+                <div class="model-card-icon">🤖</div>
+                <div class="model-card-body">
+                    <div class="model-card-title">RoBERTa <span class="ai-tag">AI</span></div>
+                    <div class="model-card-desc">Deep learning transformer — higher accuracy</div>
+                </div>
+                <div class="model-card-badge badge-accurate">🎯 Accurate</div>
+            </label>
+        -->
+        </div>
+    </div>
+    <br>
+
+    <div class="platform-tabs">
+        <button class="platform-tab active" data-platform="text">
+            <i class="fas fa-align-left"></i>Text
+        <!---
+        </button>
+        <button class="platform-tab" data-platform="youtube" {% if not platforms.youtube %}disabled{% endif %}>
+            <i class="fab fa-youtube"></i>YouTube
+        </button>
+        <button class="platform-tab" data-platform="twitter" {% if not platforms.twitter %}disabled title="Configure API key"{% endif %}>
+            <i class="fab fa-twitter"></i>Twitter
+        </button>
+        <button class="platform-tab" data-platform="reddit">
+            <i class="fab fa-reddit"></i>Reddit
+        </button>
+        <button class="platform-tab" data-platform="instagram" {% if not platforms.instagram %}disabled title="Configure API key"{% endif %}>
+            <i class="fab fa-instagram"></i>Instagram
+        </button>
+        <button class="platform-tab" data-platform="facebook" {% if not platforms.facebook %}disabled title="Configure API key"{% endif %}>
+            <i class="fab fa-facebook"></i>Facebook
+        </button>
+    -->
+        <button class="platform-tab" data-platform="news" {% if not platforms.news %}disabled title="Configure API key"{% endif %}>
+            <i class="fas fa-newspaper"></i>News
+        </button>
+        <button class="platform-tab" data-platform="csv">
+            <i class="fas fa-file-csv"></i>CSV
+        </button>
+    </div>
+
+    <form action="/analyze_text" method="post" class="platform-form active" id="form-text">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fas fa-align-left platform-text"></i>Analyze Text</h3>
+        <textarea name="text" rows="4" class="form-control" placeholder="Enter any text to analyze its sentiment..."></textarea>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i>Analyze</button>
+    </form>
+
+    <form action="/analyze_youtube" method="post" class="platform-form" id="form-youtube">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fab fa-youtube platform-youtube"></i>YouTube Comments</h3>
+        <input type="text" name="video_url" class="form-control" placeholder="YouTube Video URL" required>
+        <input type="number" name="num_comments" class="form-control" placeholder="Number of comments" value="20" min="1" max="100">
+        <button type="submit" class="btn btn-danger"><i class="fab fa-youtube"></i>Analyze</button>
+    </form>
+
+    <form action="/analyze_twitter" method="post" class="platform-form" id="form-twitter">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fab fa-twitter platform-twitter"></i>Twitter/X Posts</h3>
+        <input type="text" name="query" class="form-control" placeholder="Search query (e.g., #python, keyword)" required>
+        <input type="number" name="num_tweets" class="form-control" placeholder="Number of tweets" value="20" min="1" max="100">
+        <button type="submit" class="btn" style="background:#1DA1F2;color:white;"><i class="fab fa-twitter"></i>Analyze</button>
+    </form>
+
+    <form action="/analyze_reddit" method="post" class="platform-form" id="form-reddit">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fab fa-reddit platform-reddit"></i>Reddit Posts</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" name="query" class="form-control" placeholder="Search query (optional)">
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="subreddit" class="form-control" placeholder="Subreddit (e.g., technology)">
+            </div>
+        </div>
+        <input type="number" name="num_posts" class="form-control" placeholder="Number of posts" value="20" min="1" max="100">
+        <button type="submit" class="btn" style="background:#FF4500;color:white;"><i class="fab fa-reddit"></i>Analyze</button>
+    </form>
+
+
+    <form action="/analyze_news" method="post" class="platform-form" id="form-news">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fas fa-newspaper platform-news"></i>News Sentiment</h3>
+        <input type="text" name="query" class="form-control" placeholder="Company name (e.g., TCS, Reliance, Infosys)" required>
+        <select name="source_type" class="form-control">
+            <option value="indian">Indian News Sources Only</option>
+            <option value="global">Global News Sources</option>
+            <option value="all">All News Sources</option>
+        </select>
+        <input type="number" name="num_articles" class="form-control" placeholder="Number of articles" value="20" min="1" max="100">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-newspaper"></i>Analyze News</button>
+    </form>
+
+    <form action="/analyze_csv" method="post" class="platform-form" id="form-csv" enctype="multipart/form-data">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fas fa-file-csv platform-csv"></i>Upload CSV</h3>
+        <input type="file" name="file" class="form-control" accept=".csv" required>
+        <p class="text-muted">Upload a CSV file with text in the first column</p>
+        <button type="submit" class="btn btn-success"><i class="fas fa-file-csv"></i>Analyze</button>
+    </form>
+
+    <form action="/analyze_instagram" method="post" class="platform-form" id="form-instagram">
+        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+        <h3><i class="fab fa-instagram platform-instagram"></i>Instagram Posts</h3>
+        <input type="text" name="query" class="form-control" placeholder="Search query (optional)">
+        <input type="number" name="num_posts" class="form-control" placeholder="Number of posts" value="20" min="1" max="100">
+        <button type="submit" class="btn" style="background:#E1306C;color:white;"><i class="fab fa-instagram"></i>Analyze</button>
+    </form>
+
+    <div class="platform-form" id="form-facebook">
+        <h3><i class="fab fa-facebook platform-facebook"></i>Facebook</h3>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Facebook API requires authentication. Please use the API endpoint with a valid access token.
+        </div>
+        <a href="/api/status" class="btn btn-outline-primary" target="_blank">Check API Status</a>
+    </div>
+
+    <hr>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="fas fa-code"></i> REST API</h5>
+                    <p>Use the API for programmatic access:</p>
+                    <code class="d-block p-2 bg-light">POST /api/analyze</code>
+                    <a href="/api/status" class="btn btn-sm btn-outline-secondary mt-2">API Status</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="fas fa-history"></i> Analysis History</h5>
+                    <p>View past analyses and statistics</p>
+                    <a href="/history" class="btn btn-sm btn-primary">View History</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ── Platform Tab switching ────────────────────────────────
+document.querySelectorAll('.platform-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        if (this.disabled) return;
+        document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const platform = this.dataset.platform;
+        document.querySelectorAll('.platform-form').forEach(form => form.classList.remove('active'));
+        document.getElementById('form-' + platform).classList.add('active');
+    });
+});
+
+// ── Dark Mode ─────────────────────────────────────────────
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const icon  = document.getElementById('darkModeIcon');
+    const label = document.getElementById('darkModeLabel');
+    if (theme === 'dark') {
+        if (icon)  { icon.className  = 'fas fa-sun'; }
+        if (label) { label.textContent = 'Light Mode'; }
+    } else {
+        if (icon)  { icon.className  = 'fas fa-moon'; }
+        if (label) { label.textContent = 'Dark Mode'; }
+    }
+}
+
+function toggleDarkMode() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = (current === 'dark') ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+}
+
+// Apply saved theme on load
+const savedTheme = localStorage.getItem('theme') || 'light';
+applyTheme(savedTheme);
+
+// ── Loading Overlay ───────────────────────────────────────
+const overlay    = document.getElementById('loadingOverlay');
+const loaderTitle = document.getElementById('loaderTitle');
+const loaderSub   = document.getElementById('loaderSub');
+
+const loadingMessages = {
+    text:    { title: 'Analyzing Text Sentiment...', sub: 'Running ML model on your input' },
+    youtube: { title: 'Fetching YouTube Comments...', sub: 'Pulling comments and running analysis' },
+    twitter: { title: 'Fetching Tweets...', sub: 'Searching and analyzing Twitter posts' },
+    reddit:  { title: 'Fetching Reddit Posts...', sub: 'Scanning subreddits for data' },
+    instagram: { title: 'Fetching Instagram Posts...', sub: 'Scanning and analyzing Instagram posts' },
+    news:    { title: 'Scanning News Sources...', sub: 'Fetching sector-wise news articles — this may take a moment' },
+    csv:     { title: 'Processing CSV File...', sub: 'Reading and analyzing all rows' },
+};
+
+document.querySelectorAll('.platform-form form, form[action]').forEach(form => {
+    form.addEventListener('submit', function() {
+        const activePlatform = document.querySelector('.platform-tab.active')?.dataset.platform || 'text';
+        const msg = loadingMessages[activePlatform] || loadingMessages.text;
+        loaderTitle.textContent = msg.title;
+        loaderSub.textContent   = msg.sub;
+        overlay.classList.add('active');
+    });
+});
+
+// ── Model Selector ────────────────────────────────────────
+document.querySelectorAll('.model-card').forEach(card => {
+    card.addEventListener('click', function() {
+        // Toggle active state
+        document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        // Update all hidden inputs
+        const modelName = this.dataset.model;
+        document.querySelectorAll('.model-name-input').forEach(input => {
+            input.value = modelName;
+        });
+        // Save selection
+        localStorage.setItem('selectedModel', modelName);
+    });
+});
+
+// Restore saved model on load
+(function() {
+    const saved = localStorage.getItem('selectedModel');
+    if (saved) {
+        const card = document.querySelector('.model-card[data-model="' + saved + '"]');
+        if (card) {
+            document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            card.querySelector('input[type=radio]').checked = true;
+            document.querySelectorAll('.model-name-input').forEach(input => {
+                input.value = saved;
+            });
+        }
+    }
+})();
+</script>

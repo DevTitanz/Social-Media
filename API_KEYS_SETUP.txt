@@ -1,0 +1,43 @@
+# ============================================
+# SOCIAL MEDIA SENTIMENT ANALYZER - API KEYS
+# ============================================
+# 
+# INSTRUCTIONS:
+# 1. Generate API keys from each platform's developer portal
+# 2. Paste your keys below (inside the quotes)
+# 3. Save this file as .env
+# 
+# ============================================
+
+# ---- YOUTUBE ----
+# Get from: https://console.cloud.google.com/
+# Enable YouTube Data API v3
+YOUTUBE_API_KEY=""
+
+# ---- TWITTER/X ----
+# Get from: https://developer.twitter.com/en/portal/dashboard
+# Create a project and get Bearer Token
+TWITTER_BEARER_TOKEN=""
+
+# ---- REDDIT ----
+# Get from: https://www.reddit.com/prefs/apps
+# Create a "script" app
+REDDIT_CLIENT_ID=""
+REDDIT_CLIENT_SECRET=""
+
+# ---- INSTAGRAM ----
+# Get from: https://developers.facebook.com/
+# Create app with Instagram Basic Display
+INSTAGRAM_ACCESS_TOKEN=""
+
+# ---- FACEBOOK ----
+# Get from: https://developers.facebook.com/
+# Create app and get Page Access Token
+FACEBOOK_ACCESS_TOKEN=""
+
+# ---- SETTINGS ----
+# Options: model, vader, textblob
+SENTIMENT_MODEL="model"
+
+# Options: DEBUG, INFO, WARNING, ERROR
+LOG_LEVEL="INFO"
