@@ -74,10 +74,11 @@ class NewsAdapter(PlatformAdapter):
             params = {
                 "q": query,
                 "language": "en",
-                "sortBy": "publishedAt",
+                "sortBy": "relevance",
                 "pageSize": min(limit, 100),
-                "domains": domains
             }
+            if domains:
+                params["domains"] = domains
             
             response = requests.get(
                 f"{self.base_url}/everything",
@@ -127,13 +128,119 @@ class NewsAdapter(PlatformAdapter):
             return ",".join(INDIAN_NEWS_DOMAINS)
         elif source_type == "global":
             return ",".join(GLOBAL_NEWS_DOMAINS)
-        return ",".join(ALL_NEWS_DOMAINS)
+        return ""
     
+    def fetch_google_news_rss(self, query: str, limit: int = 50,
+                               source_type: str = "all") -> List[Dict[str, Any]]:
+        """Fetch real-time news articles from Google News RSS feed"""
+        import xml.etree.ElementTree as ET
+        import urllib.parse
+        from datetime import datetime
+
+        encoded_query = urllib.parse.quote(query)
+        if source_type == "indian":
+            url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-IN&gl=IN&ceid=IN:en"
+        else:
+            url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
+
+        articles = []
+        try:
+            resp = requests.get(
+                url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+                timeout=15
+            )
+            if resp.status_code != 200:
+                return []
+
+            root = ET.fromstring(resp.content)
+            items = root.findall('./channel/item')
+
+            for item in items[:limit]:
+                raw_title = item.find('title').text if item.find('title') is not None else ""
+                url_elem = item.find('link')
+                article_url = url_elem.text if url_elem is not None else ""
+                pub_elem = item.find('pubDate')
+                pub_text = pub_elem.text if pub_elem is not None else ""
+                
+                # Format published date to YYYY-MM-DD
+                pub_date = datetime.now().strftime("%Y-%m-%d")
+                if pub_text:
+                    try:
+                        # RFC 822 / 2822 date parsing e.g. "Tue, 08 Sep 2026 12:00:00 GMT"
+                        parsed_dt = datetime.strptime(pub_text[:16].strip(), "%a, %d %b %Y")
+                        pub_date = parsed_dt.strftime("%Y-%m-%d")
+                    except Exception:
+                        pub_date = pub_text[:10]
+
+                source_elem = item.find('source')
+                source_name = source_elem.text if source_elem is not None else "Google News"
+
+                # If source is in the title, e.g. "Headline - Source Name", extract source name
+                clean_title = raw_title
+                if " - " in raw_title:
+                    parts = raw_title.rsplit(" - ", 1)
+                    clean_title = parts[0].strip()
+                    if source_name == "Google News" and len(parts) > 1:
+                        source_name = parts[1].strip()
+
+                clean_title = self._clean_text(clean_title)
+                if clean_title:
+                    articles.append({
+                        "title": clean_title,
+                        "description": "",
+                        "source": source_name,
+                        "url": article_url,
+                        "published_at": pub_date,
+                        "text": clean_title
+                    })
+            logger.info(f"Fetched {len(articles)} articles from Google News RSS for query: {query}")
+        except Exception as e:
+            logger.warning(f"Google News RSS fetch failed: {e}")
+
+        return articles
+
+    def fetch_topic_coverage(self, query: str, limit: int = 30,
+                             source_type: str = "all") -> List[Dict[str, Any]]:
+        """
+        Unified multi-source coverage fetcher for trends & company topics.
+        Combines NewsAPI and Google News RSS with deduplication.
+        """
+        seen_titles = set()
+        combined = []
+
+        # 1. Try NewsAPI if configured
+        if self.api_key:
+            try:
+                newsapi_articles = self.search_news(query, limit=limit, source_type=source_type)
+                for art in newsapi_articles:
+                    norm = art['title'].lower()[:50]
+                    if norm not in seen_titles:
+                        seen_titles.add(norm)
+                        combined.append(art)
+            except Exception as e:
+                logger.warning(f"NewsAPI error in topic coverage: {e}")
+
+        # 2. Augment with Google News RSS to guarantee comprehensive real-time coverage
+        if len(combined) < limit:
+            needed = limit - len(combined)
+            rss_articles = self.fetch_google_news_rss(query, limit=max(needed, 15), source_type=source_type)
+            for art in rss_articles:
+                norm = art['title'].lower()[:50]
+                if norm not in seen_titles:
+                    seen_titles.add(norm)
+                    combined.append(art)
+                if len(combined) >= limit:
+                    break
+
+        return combined[:limit]
+
     def fetch_posts(self, query: str, limit: int = 50, **kwargs) -> List[str]:
         source_type = kwargs.get("source_type", "indian")
-        articles = self.search_news(query, limit, source_type)
+        articles = self.fetch_topic_coverage(query, limit, source_type)
         return [a["text"] for a in articles]
 
 
 def create_news_adapter() -> NewsAdapter:
     return NewsAdapter()
+

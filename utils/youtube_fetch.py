@@ -1,6 +1,7 @@
 
 import os
 import re
+import html
 import logging
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -89,7 +90,13 @@ def fetch_youtube_comments(video_url, max_results):
     
     if "items" in response:
         for item in response["items"]:
-            comment = item["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
-            comments.append(comment)
+            raw_comment = item.get("snippet", {}).get("topLevelComment", {}).get("snippet", {}).get("textDisplay", "")
+            if raw_comment:
+                # Unescape HTML entities (&quot;, &amp;, &#39;) and strip tags like <br>, <a>
+                clean_comment = html.unescape(raw_comment)
+                clean_comment = re.sub(r'<[^>]+>', ' ', clean_comment)
+                clean_comment = re.sub(r'\s+', ' ', clean_comment).strip()
+                if clean_comment:
+                    comments.append(clean_comment)
     
     return comments

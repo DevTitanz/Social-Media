@@ -46,7 +46,7 @@ class FacebookAdapter(PlatformAdapter):
         
         try:
             response = requests.get(
-                f"{self.base_url_url}/{page_id}/posts",
+                f"{self.base_url}/{page_id}/posts",
                 params={
                     "limit": min(limit, 100),
                     "fields": "message,story,description",

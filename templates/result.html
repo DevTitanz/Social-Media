@@ -14,26 +14,92 @@
         }
     </style>
 
-    <!-- Fixed toolbar: Dark Mode + Positivity Mode + PDF Export -->
-    <div class="d-flex justify-content-between align-items-center mt-3 mb-4 flex-wrap gap-2 no-print">
-        <h1 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Sentiment Analysis Results</h1>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Dark Mode -->
-            <button class="dark-mode-toggle position-static shadow-sm" id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle Dark Mode">
-                <i class="fas fa-moon" id="darkModeIcon"></i>
-                <span id="darkModeLabel">Dark</span>
-            </button>
+    <!-- Minimal Top Toolbar -->
+    <header class="minimal-nav no-print">
+        <div class="brand-badge">
+            <a href="/" class="brand-logo-icon text-decoration-none" title="Back to Home">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="brand-title">
+                    {% if topic_query %}
+                    {{ topic_query }} <span class="badge bg-primary ms-2" style="font-size: 0.72rem; vertical-align: middle;">Topic Pulse</span>
+                    {% else %}
+                    Sentiment Analysis Report
+                    {% endif %}
+                </h1>
+                <p class="brand-subtitle">Detailed evaluation &amp; media insights</p>
+            </div>
+        </div>
+        <div class="nav-actions">
             <!-- Positivity Mode -->
-            <button id="positivityBtn" class="btn btn-outline-success rounded-pill shadow-sm fw-bold px-3"
-                onclick="document.body.classList.toggle('positivity-mode'); this.classList.toggle('btn-success'); this.classList.toggle('btn-outline-success'); this.innerHTML = this.innerHTML.includes('Enable') ? '<i class=\'fas fa-eye-slash me-2\'></i>Disable Positivity' : '<i class=\'fas fa-magic me-2\'></i>Enable Positivity'">
-                <i class="fas fa-magic me-2"></i>Enable Positivity
+            <button id="positivityBtn" class="nav-btn"
+                onclick="document.body.classList.toggle('positivity-mode'); this.classList.toggle('btn-success'); this.innerHTML = this.innerHTML.includes('Hide') ? '<i class=\'fas fa-eye me-1\'></i> Show All' : '<i class=\'fas fa-eye-slash me-1\'></i> Positivity Mode'">
+                <i class="fas fa-eye-slash me-1"></i> Positivity Mode
             </button>
             <!-- PDF Export -->
-            <button class="pdf-export-btn no-print" onclick="exportToPDF()">
-                <i class="fas fa-file-pdf"></i> Export PDF
+            <button class="nav-btn" onclick="exportToPDF()">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <!-- Dark Mode Toggle -->
+            <button id="darkModeBtn" onclick="toggleDarkMode()" class="theme-toggle-btn" title="Toggle theme">
+                <i class="fas fa-moon" id="darkModeIcon"></i>
+                <span id="darkModeLabel" class="d-none">Dark</span>
             </button>
         </div>
+    </header>
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <a href="/" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> New Analysis
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge px-3 py-2 rounded-pill fw-semibold {% if model_name == 'roberta' %}bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25{% else %}bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50{% endif %}" style="font-size: 0.9rem;">
+                <i class="fas {% if model_name == 'roberta' %}fa-robot{% else %}fa-bolt{% endif %} me-1"></i>
+                Model: <strong>{{ 'RoBERTa (Transformer)' if model_name == 'roberta' else 'Logistic Regression (TF-IDF)' }}</strong>
+            </span>
+        </div>
     </div>
+
+    {% if detailed_analysis %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0 border-start border-4 {% if detailed_analysis.sentiment == 'positive' %}border-success{% elif detailed_analysis.sentiment == 'negative' %}border-danger{% else %}border-warning{% endif %}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h4 class="mb-0 fw-bold">
+                            <i class="fas {% if detailed_analysis.sentiment == 'positive' %}fa-smile text-success{% elif detailed_analysis.sentiment == 'negative' %}fa-frown text-danger{% else %}fa-meh text-warning{% endif %} me-2"></i>
+                            Predicted Sentiment: <span class="badge {% if detailed_analysis.sentiment == 'positive' %}bg-success{% elif detailed_analysis.sentiment == 'negative' %}bg-danger{% else %}bg-warning text-dark{% endif %} text-uppercase px-3 py-2" style="font-size: 1rem;">{{ detailed_analysis.sentiment }}</span>
+                        </h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge px-3 py-2 rounded-pill fw-semibold {% if model_name == 'roberta' %}bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25{% else %}bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50{% endif %}" style="font-size: 0.85rem;">
+                                <i class="fas {% if model_name == 'roberta' %}fa-robot{% else %}fa-bolt{% endif %} me-1"></i>{{ 'RoBERTa' if model_name == 'roberta' else 'Logistic Regression' }}
+                            </span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-bold" style="font-size: 0.95rem;">
+                                <i class="fas fa-bullseye me-1"></i>Confidence: {{ (detailed_analysis.confidence * 100)|round(1) }}%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light rounded border mb-3">
+                        <p class="mb-0 fst-italic" style="font-size: 1.05rem; font-family: 'Inter', sans-serif;">"{{ results[0][0] }}"</p>
+                    </div>
+                    {% if detailed_analysis.scores %}
+                    <div class="row g-2 text-center">
+                        {% for cls_name, score_val in detailed_analysis.scores.items() %}
+                        <div class="col">
+                            <div class="p-2 rounded border bg-white shadow-sm">
+                                <small class="text-muted text-uppercase fw-bold d-block">{{ cls_name }}</small>
+                                <span class="fw-bold" style="font-size: 1.1rem;">{{ (score_val * 100)|round(1) }}%</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% if stats %}
     <div class="row mb-4">
@@ -82,7 +148,7 @@
         {% if advanced_stats %}
         <!-- 1. Positive Momentum Score -->
         <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center text-center p-4" style="background: linear-gradient(145deg, #f0fff8, #e6fff2);">
+            <div class="card h-100 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center text-center p-4 gradient-spotlight">
                 <h5 class="card-title text-success mb-3 fw-bold"><i class="fas fa-rocket text-success me-2"></i>Positive Momentum</h5>
                 <h1 class="display-1 fw-bold mb-0" style="background: -webkit-linear-gradient(45deg, #12b886, #20c997); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ stats.positive_pct }}</h1>
                 <p class="mt-0 fw-bold text-success" style="font-size: 1.5rem;">%</p>
@@ -311,13 +377,21 @@
     {% endif %}
 
     {% if analysis_type %}
-    <div class="mb-3">
-        <span class="badge bg-primary">Analysis Type: {{ analysis_type|capitalize }}</span>
-        <span class="badge bg-secondary">Total: {{ stats.total if stats else 0 }}</span>
+    <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+        <span class="badge bg-primary px-3 py-2" style="font-size: 0.9rem;">
+            <i class="fas {% if analysis_type == 'topic' %}fa-fire text-danger{% elif analysis_type == 'news' %}fa-newspaper{% elif analysis_type == 'youtube' %}fa-youtube text-danger{% elif analysis_type == 'twitter' %}fa-twitter text-info{% else %}fa-chart-bar{% endif %} me-1"></i>
+            {{ analysis_type|capitalize }}
+        </span>
+        {% if topic_query %}
+        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2" style="font-size: 0.9rem;">
+            <i class="fas fa-tag me-1"></i>Topic: <strong>{{ topic_query }}</strong>
+        </span>
+        {% endif %}
+        <span class="badge bg-secondary px-3 py-2" style="font-size: 0.9rem;">Total Items: {{ stats.total if stats else 0 }}</span>
     </div>
     {% endif %}
 
-    <input class="form-control mb-3" id="searchInput" type="text" placeholder="Search comments...">
+    <input class="form-control mb-3" id="searchInput" type="text" placeholder="Search analyzed coverage or headlines...">
 
 
     {% if wordcloud_files %}
@@ -404,7 +478,7 @@
     {% if key_achievements %}
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card shadow border-0 border-top border-success border-4" style="background: linear-gradient(145deg, #f8fff9, #e6ffe6);">
+            <div class="card shadow border-0 border-top border-success border-4 gradient-success">
                 <div class="card-body">
                     <h4 class="card-title text-success fw-bold mb-3"><i class="fas fa-trophy me-2 text-warning" style="font-size: 1.2rem;"></i>Why They Are Winning (Key Market Highlights)</h4>
                     <div class="list-group list-group-flush bg-transparent">
@@ -775,6 +849,7 @@
 // ══ Dark Mode ═══════════════════════════════════════════════
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
     const icon  = document.getElementById('darkModeIcon');
     const label = document.getElementById('darkModeLabel');
     if (theme === 'dark') {

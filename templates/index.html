@@ -1,183 +1,362 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Intelligence &amp; Analytics Studio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
 
-<!-- Loading Overlay -->
+<!-- Minimal Loading Overlay -->
 <div id="loadingOverlay">
     <div class="loader-ring"></div>
     <div class="loader-text" id="loaderTitle">Analyzing Sentiment...</div>
     <div class="loader-subtext" id="loaderSub">Fetching and processing data, please wait</div>
 </div>
 
-
-
 <div class="container">
 
-    <div class="header-info">
-        <h1><i class="fas fa-chart-pie platform-icon"></i>Adani Positive Media Sentiment Analyzer</h1>
-        <div class="d-flex align-items-center gap-3">
-            <a href="/history" class="api-link"><i class="fas fa-history"></i> View History</a>
-            <button id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle Dark Mode"
-                style="background:rgba(255,255,255,0.55);border:1px solid rgba(0,0,0,0.1);border-radius:20px;padding:6px 16px;font-size:0.85rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.3s;">
+    <!-- Minimal Header -->
+    <header class="minimal-nav">
+        <div class="brand-badge">
+            <div class="brand-logo-icon">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+            <div>
+                <h1 class="brand-title">Sentiment Studio</h1>
+                <p class="brand-subtitle">Multi-Platform AI Sentiment &amp; Media Intelligence</p>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="/history" class="nav-btn">
+                <i class="fas fa-clock-rotate-left"></i> History
+            </a>
+            <button id="darkModeBtn" onclick="toggleDarkMode()" class="theme-toggle-btn" title="Toggle theme">
                 <i class="fas fa-moon" id="darkModeIcon"></i>
-                <span id="darkModeLabel">Dark</span>
+                <span id="darkModeLabel" class="d-none">Dark</span>
             </button>
         </div>
-    </div>
+    </header>
 
-    <!-- ── Model Selector ─────────────────────────────────────── -->
+    <!-- Model Selector -->
     <div class="model-selector-section">
-        <div class="model-selector-label"><i class="fas fa-brain"></i> Choose Sentiment Model</div>
+        <div class="model-selector-label">
+            <i class="fas fa-microchip"></i> Active AI Model
+        </div>
         <div class="model-selector-cards">
             <label class="model-card active" data-model="logistic_regression" id="model-card-lr">
                 <input type="radio" name="_model_switch" value="logistic_regression" checked hidden>
-                <div class="model-card-icon">📊</div>
-                <div class="model-card-body">
+                <div class="model-card-icon">⚡</div>
+                <div>
                     <div class="model-card-title">Logistic Regression</div>
-                    <div class="model-card-desc">Fast &amp; lightweight — TF-IDF based ML model</div>
+                    <div class="model-card-desc">TF-IDF machine learning model &bull; Fast &amp; lightweight</div>
                 </div>
-                <div class="model-card-badge badge-fast">⚡ Fast</div>
+                <div class="model-card-badge">Production Ready</div>
             </label>
-            <!--
             <label class="model-card" data-model="roberta" id="model-card-roberta">
                 <input type="radio" name="_model_switch" value="roberta" hidden>
                 <div class="model-card-icon">🤖</div>
-                <div class="model-card-body">
-                    <div class="model-card-title">RoBERTa <span class="ai-tag">AI</span></div>
-                    <div class="model-card-desc">Deep learning transformer — higher accuracy</div>
+                <div>
+                    <div class="model-card-title">RoBERTa (Transformer)</div>
+                    <div class="model-card-desc">Deep neural network fine-tuned for social media &bull; CardiffNLP</div>
                 </div>
-                <div class="model-card-badge badge-accurate">🎯 Accurate</div>
+                <div class="model-card-badge" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">High Accuracy</div>
             </label>
-        -->
         </div>
     </div>
-    <br>
 
+    <!-- Platform Selector (Segmented Bar) -->
     <div class="platform-tabs">
-        <button class="platform-tab active" data-platform="text">
-            <i class="fas fa-align-left"></i>Text
-        <!---
+        <button class="platform-tab active" data-platform="topic">
+            <i class="fas fa-fire text-danger"></i> Topic &amp; Company
         </button>
-        <button class="platform-tab" data-platform="youtube" {% if not platforms.youtube %}disabled{% endif %}>
-            <i class="fab fa-youtube"></i>YouTube
+        <button class="platform-tab" data-platform="text">
+            <i class="fas fa-align-left"></i> Text
         </button>
-        <button class="platform-tab" data-platform="twitter" {% if not platforms.twitter %}disabled title="Configure API key"{% endif %}>
-            <i class="fab fa-twitter"></i>Twitter
+        {% if platforms.news %}
+        <button class="platform-tab" data-platform="news">
+            <i class="fas fa-newspaper"></i> News
         </button>
+        {% endif %}
+        {% if platforms.youtube %}
+        <button class="platform-tab" data-platform="youtube">
+            <i class="fab fa-youtube text-danger"></i> YouTube
+        </button>
+        {% endif %}
+        {% if platforms.twitter %}
+        <button class="platform-tab" data-platform="twitter">
+            <i class="fab fa-twitter text-info"></i> Twitter
+        </button>
+        {% endif %}
+        {% if platforms.reddit %}
         <button class="platform-tab" data-platform="reddit">
-            <i class="fab fa-reddit"></i>Reddit
+            <i class="fab fa-reddit text-danger"></i> Reddit
         </button>
-        <button class="platform-tab" data-platform="instagram" {% if not platforms.instagram %}disabled title="Configure API key"{% endif %}>
-            <i class="fab fa-instagram"></i>Instagram
+        {% endif %}
+        {% if platforms.instagram %}
+        <button class="platform-tab" data-platform="instagram">
+            <i class="fab fa-instagram text-danger"></i> Instagram
         </button>
-        <button class="platform-tab" data-platform="facebook" {% if not platforms.facebook %}disabled title="Configure API key"{% endif %}>
-            <i class="fab fa-facebook"></i>Facebook
-        </button>
-    -->
-        <button class="platform-tab" data-platform="news" {% if not platforms.news %}disabled title="Configure API key"{% endif %}>
-            <i class="fas fa-newspaper"></i>News
-        </button>
+        {% endif %}
         <button class="platform-tab" data-platform="csv">
-            <i class="fas fa-file-csv"></i>CSV
+            <i class="fas fa-file-csv text-success"></i> CSV Batch
         </button>
+        {% if platforms.facebook %}
+        <button class="platform-tab" data-platform="facebook">
+            <i class="fab fa-facebook text-primary"></i> Facebook
+        </button>
+        {% endif %}
     </div>
 
-    <form action="/analyze_text" method="post" class="platform-form active" id="form-text">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fas fa-align-left platform-text"></i>Analyze Text</h3>
-        <textarea name="text" rows="4" class="form-control" placeholder="Enter any text to analyze its sentiment..."></textarea>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i>Analyze</button>
-    </form>
+    <!-- Main Form Container -->
+    <div class="card minimal-card">
+        <div class="card-body">
 
-    <form action="/analyze_youtube" method="post" class="platform-form" id="form-youtube">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fab fa-youtube platform-youtube"></i>YouTube Comments</h3>
-        <input type="text" name="video_url" class="form-control" placeholder="YouTube Video URL" required>
-        <input type="number" name="num_comments" class="form-control" placeholder="Number of comments" value="20" min="1" max="100">
-        <button type="submit" class="btn btn-danger"><i class="fab fa-youtube"></i>Analyze</button>
-    </form>
+            <!-- 1. Topic & Company Trend Form -->
+            <form action="/analyze_topic" method="post" class="platform-form active" id="form-topic">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="mb-1">Search Trend or Company Topic</h4>
+                        <p class="mb-0" style="font-size: 0.88rem;">Scan real-time news &amp; market coverage across any company or trending topic.</p>
+                    </div>
+                    <span class="badge bg-primary">Live Pulse</span>
+                </div>
 
-    <form action="/analyze_twitter" method="post" class="platform-form" id="form-twitter">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fab fa-twitter platform-twitter"></i>Twitter/X Posts</h3>
-        <input type="text" name="query" class="form-control" placeholder="Search query (e.g., #python, keyword)" required>
-        <input type="number" name="num_tweets" class="form-control" placeholder="Number of tweets" value="20" min="1" max="100">
-        <button type="submit" class="btn" style="background:#1DA1F2;color:white;"><i class="fab fa-twitter"></i>Analyze</button>
-    </form>
+                <!-- Quick Trending Chips -->
+                <div class="mb-4">
+                    <label class="form-label text-muted small mb-2">Popular Topics</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="trend-chip" onclick="setTopic('Nvidia AI')">Nvidia AI</button>
+                        <button type="button" class="trend-chip" onclick="setTopic('OpenAI')">OpenAI</button>
+                        <button type="button" class="trend-chip" onclick="setTopic('Tesla EV')">Tesla EV</button>
+                        <button type="button" class="trend-chip" onclick="setTopic('Apple Intelligence')">Apple Intelligence</button>
+                        <button type="button" class="trend-chip" onclick="setTopic('Reliance Industries')">Reliance</button>
+                        <button type="button" class="trend-chip" onclick="setTopic('Tata Motors')">Tata Motors</button>
+                        <button type="button" class="trend-chip" onclick="setTopic('Artificial Intelligence')">Artificial Intelligence</button>
+                    </div>
+                </div>
 
-    <form action="/analyze_reddit" method="post" class="platform-form" id="form-reddit">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fab fa-reddit platform-reddit"></i>Reddit Posts</h3>
-        <div class="row">
-            <div class="col-md-6">
-                <input type="text" name="query" class="form-control" placeholder="Search query (optional)">
-            </div>
-            <div class="col-md-6">
-                <input type="text" name="subreddit" class="form-control" placeholder="Subreddit (e.g., technology)">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Company Name or Topic</label>
+                    <input type="text" name="query" id="topicQueryInput" class="form-control" placeholder="e.g. Nvidia, OpenAI, Apple, Bitcoin, Renewable Energy" required>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-7">
+                        <label class="form-label">Coverage Scope</label>
+                        <select name="source_type" class="form-control">
+                            <option value="all" selected>All Global News &amp; Media (Recommended)</option>
+                            <option value="global">Global Financial &amp; Tech Press (Bloomberg, Reuters, WSJ)</option>
+                            <option value="indian">Indian Financial &amp; National Press (ET, Mint, Moneycontrol)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Sample Size</label>
+                        <input type="number" name="num_articles" class="form-control" value="25" min="5" max="100">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass"></i> Analyze Topic Sentiment
+                </button>
+            </form>
+
+            <!-- 2. Text Form -->
+            <form action="/analyze_text" method="post" class="platform-form" id="form-text">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Direct Text Analysis</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Classify customer feedback, statements, product reviews, or remarks.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Input Text</label>
+                    <textarea name="text" rows="5" class="form-control" placeholder="Paste or type text here to evaluate sentiment..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-bolt"></i> Analyze Text
+                </button>
+            </form>
+
+            <!-- 3. YouTube Form -->
+            <form action="/analyze_youtube" method="post" class="platform-form" id="form-youtube">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">YouTube Comments Sentiment</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Extract top comments from a YouTube video URL and analyze audience reactions.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Video URL</label>
+                    <input type="text" name="video_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Comments</label>
+                    <input type="number" name="num_comments" class="form-control" value="20" min="1" max="100">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fab fa-youtube"></i> Analyze YouTube Comments
+                </button>
+            </form>
+
+            <!-- 4. Twitter Form -->
+            <form action="/analyze_twitter" method="post" class="platform-form" id="form-twitter">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Twitter / X Sentiment</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Analyze public discussions, hashtags, or query mentions.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Search Query or Hashtag</label>
+                    <input type="text" name="query" class="form-control" placeholder="e.g. #AI, Tesla, Microsoft" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Tweets</label>
+                    <input type="number" name="num_tweets" class="form-control" value="20" min="1" max="100">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fab fa-twitter"></i> Analyze Tweets
+                </button>
+            </form>
+
+            <!-- 5. Reddit Form -->
+            <form action="/analyze_reddit" method="post" class="platform-form" id="form-reddit">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Reddit Community Sentiment</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Scan Reddit discussions and posts across subreddits or topics.</p>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Search Query</label>
+                        <input type="text" name="query" class="form-control" placeholder="e.g. iPhone, EV, Stocks">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Subreddit (Optional)</label>
+                        <input type="text" name="subreddit" class="form-control" placeholder="e.g. technology, stocks">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Posts</label>
+                    <input type="number" name="num_posts" class="form-control" value="20" min="1" max="100">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fab fa-reddit"></i> Analyze Reddit Posts
+                </button>
+            </form>
+
+            <!-- 6. News Form -->
+            <form action="/analyze_news" method="post" class="platform-form" id="form-news">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Corporate &amp; Sector News</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Analyze headlines and articles from premier business journalism.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Company or Entity</label>
+                    <input type="text" name="query" class="form-control" placeholder="e.g. Tesla, Apple, Reliance, Infosys" required>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Region / Sources</label>
+                        <select name="source_type" class="form-control">
+                            <option value="all">All News Sources</option>
+                            <option value="indian">Indian Financial Sources</option>
+                            <option value="global">Global Financial Sources</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Number of Articles</label>
+                        <input type="number" name="num_articles" class="form-control" value="20" min="1" max="100">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-newspaper"></i> Analyze News Articles
+                </button>
+            </form>
+
+            <!-- 7. CSV Form -->
+            <form action="/analyze_csv" method="post" class="platform-form" id="form-csv" enctype="multipart/form-data">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Batch CSV Upload</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Upload any CSV spreadsheet with customer feedback or text in the first column.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Select CSV File</label>
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-file-csv"></i> Process CSV Dataset
+                </button>
+            </form>
+
+            <!-- 8. Instagram Form -->
+            <form action="/analyze_instagram" method="post" class="platform-form" id="form-instagram">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Instagram Post &amp; Reel Comments</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Scrape and analyze comments from Instagram post or reel links.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Instagram Post or Reel URL</label>
+                    <input type="text" name="query" class="form-control" placeholder="https://www.instagram.com/p/..." required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Comments</label>
+                    <input type="number" name="num_posts" class="form-control" value="20" min="1" max="100">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fab fa-instagram"></i> Analyze Instagram
+                </button>
+            </form>
+
+            <!-- 9. Facebook Form -->
+            <form action="/analyze_facebook" method="post" class="platform-form" id="form-facebook">
+                <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
+                <div class="mb-3">
+                    <h4 class="mb-1">Facebook Page Sentiment</h4>
+                    <p class="mb-0" style="font-size: 0.88rem;">Scan recent posts and user engagement for a public Facebook Page.</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Facebook Page ID or Handle</label>
+                    <input type="text" name="page_id" class="form-control" placeholder="e.g. microsoft, nasa" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Posts</label>
+                    <input type="number" name="num_posts" class="form-control" value="20" min="1" max="100">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fab fa-facebook"></i> Analyze Facebook
+                </button>
+            </form>
+
         </div>
-        <input type="number" name="num_posts" class="form-control" placeholder="Number of posts" value="20" min="1" max="100">
-        <button type="submit" class="btn" style="background:#FF4500;color:white;"><i class="fab fa-reddit"></i>Analyze</button>
-    </form>
-
-
-    <form action="/analyze_news" method="post" class="platform-form" id="form-news">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fas fa-newspaper platform-news"></i>News Sentiment</h3>
-        <input type="text" name="query" class="form-control" placeholder="Company name (e.g., TCS, Reliance, Infosys)" required>
-        <select name="source_type" class="form-control">
-            <option value="indian">Indian News Sources Only</option>
-            <option value="global">Global News Sources</option>
-            <option value="all">All News Sources</option>
-        </select>
-        <input type="number" name="num_articles" class="form-control" placeholder="Number of articles" value="20" min="1" max="100">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-newspaper"></i>Analyze News</button>
-    </form>
-
-    <form action="/analyze_csv" method="post" class="platform-form" id="form-csv" enctype="multipart/form-data">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fas fa-file-csv platform-csv"></i>Upload CSV</h3>
-        <input type="file" name="file" class="form-control" accept=".csv" required>
-        <p class="text-muted">Upload a CSV file with text in the first column</p>
-        <button type="submit" class="btn btn-success"><i class="fas fa-file-csv"></i>Analyze</button>
-    </form>
-
-    <form action="/analyze_instagram" method="post" class="platform-form" id="form-instagram">
-        <input type="hidden" name="model_name" class="model-name-input" value="logistic_regression">
-        <h3><i class="fab fa-instagram platform-instagram"></i>Instagram Posts</h3>
-        <input type="text" name="query" class="form-control" placeholder="Search query (optional)">
-        <input type="number" name="num_posts" class="form-control" placeholder="Number of posts" value="20" min="1" max="100">
-        <button type="submit" class="btn" style="background:#E1306C;color:white;"><i class="fab fa-instagram"></i>Analyze</button>
-    </form>
-
-    <div class="platform-form" id="form-facebook">
-        <h3><i class="fab fa-facebook platform-facebook"></i>Facebook</h3>
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            Facebook API requires authentication. Please use the API endpoint with a valid access token.
-        </div>
-        <a href="/api/status" class="btn btn-outline-primary" target="_blank">Check API Status</a>
     </div>
 
-    <hr>
-
-    <div class="row mt-4">
+    <!-- Quick Footer Cards -->
+    <div class="row g-3 mt-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5><i class="fas fa-code"></i> REST API</h5>
-                    <p>Use the API for programmatic access:</p>
-                    <code class="d-block p-2 bg-light">POST /api/analyze</code>
-                    <a href="/api/status" class="btn btn-sm btn-outline-secondary mt-2">API Status</a>
+            <div class="card minimal-card h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 fw-bold"><i class="fas fa-terminal me-2 text-muted"></i> REST API Access</h6>
+                        <p class="mb-0 small text-muted">Integrate automated sentiment calls programmatically.</p>
+                    </div>
+                    <a href="/api/status" class="btn btn-sm btn-outline-secondary">API Status</a>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5><i class="fas fa-history"></i> Analysis History</h5>
-                    <p>View past analyses and statistics</p>
-                    <a href="/history" class="btn btn-sm btn-primary">View History</a>
+            <div class="card minimal-card h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 fw-bold"><i class="fas fa-database me-2 text-muted"></i> Analysis Archive</h6>
+                        <p class="mb-0 small text-muted">Review past analyses, trends, and accuracy metrics.</p>
+                    </div>
+                    <a href="/history" class="btn btn-sm btn-outline-secondary">View Archive</a>
                 </div>
             </div>
         </div>
@@ -194,21 +373,23 @@ document.querySelectorAll('.platform-tab').forEach(tab => {
         this.classList.add('active');
         const platform = this.dataset.platform;
         document.querySelectorAll('.platform-form').forEach(form => form.classList.remove('active'));
-        document.getElementById('form-' + platform).classList.add('active');
+        const activeForm = document.getElementById('form-' + platform);
+        if (activeForm) activeForm.classList.add('active');
     });
 });
 
 // ── Dark Mode ─────────────────────────────────────────────
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
     const icon  = document.getElementById('darkModeIcon');
     const label = document.getElementById('darkModeLabel');
     if (theme === 'dark') {
         if (icon)  { icon.className  = 'fas fa-sun'; }
-        if (label) { label.textContent = 'Light Mode'; }
+        if (label) { label.textContent = 'Light'; }
     } else {
         if (icon)  { icon.className  = 'fas fa-moon'; }
-        if (label) { label.textContent = 'Dark Mode'; }
+        if (label) { label.textContent = 'Dark'; }
     }
 }
 
@@ -219,26 +400,35 @@ function toggleDarkMode() {
     applyTheme(next);
 }
 
-// Apply saved theme on load
 const savedTheme = localStorage.getItem('theme') || 'light';
 applyTheme(savedTheme);
 
 // ── Loading Overlay ───────────────────────────────────────
-const overlay    = document.getElementById('loadingOverlay');
+const overlay     = document.getElementById('loadingOverlay');
 const loaderTitle = document.getElementById('loaderTitle');
 const loaderSub   = document.getElementById('loaderSub');
 
 const loadingMessages = {
-    text:    { title: 'Analyzing Text Sentiment...', sub: 'Running ML model on your input' },
-    youtube: { title: 'Fetching YouTube Comments...', sub: 'Pulling comments and running analysis' },
-    twitter: { title: 'Fetching Tweets...', sub: 'Searching and analyzing Twitter posts' },
-    reddit:  { title: 'Fetching Reddit Posts...', sub: 'Scanning subreddits for data' },
-    instagram: { title: 'Fetching Instagram Posts...', sub: 'Scanning and analyzing Instagram posts' },
-    news:    { title: 'Scanning News Sources...', sub: 'Fetching sector-wise news articles — this may take a moment' },
-    csv:     { title: 'Processing CSV File...', sub: 'Reading and analyzing all rows' },
+    topic:   { title: 'Scanning Topic Coverage...', sub: 'Fetching and evaluating live media headlines' },
+    text:    { title: 'Evaluating Text...', sub: 'Running ML sentiment classification' },
+    youtube: { title: 'Fetching YouTube Comments...', sub: 'Extracting video discussion comments' },
+    twitter: { title: 'Searching Tweets...', sub: 'Pulling posts from Twitter/X' },
+    reddit:  { title: 'Scanning Subreddits...', sub: 'Reading community posts and replies' },
+    instagram: { title: 'Fetching Instagram...', sub: 'Reading post and reel comments' },
+    news:    { title: 'Scanning Financial News...', sub: 'Aggregating editorial headlines and articles' },
+    csv:     { title: 'Processing Dataset...', sub: 'Classifying CSV rows in batch' },
+    facebook:{ title: 'Reading Facebook Posts...', sub: 'Connecting to Facebook page and reading posts' }
 };
 
-document.querySelectorAll('.platform-form form, form[action]').forEach(form => {
+function setTopic(name) {
+    const input = document.getElementById('topicQueryInput');
+    if (input) {
+        input.value = name;
+        input.focus();
+    }
+}
+
+document.querySelectorAll('form[action]').forEach(form => {
     form.addEventListener('submit', function() {
         const activePlatform = document.querySelector('.platform-tab.active')?.dataset.platform || 'text';
         const msg = loadingMessages[activePlatform] || loadingMessages.text;
@@ -251,20 +441,16 @@ document.querySelectorAll('.platform-form form, form[action]').forEach(form => {
 // ── Model Selector ────────────────────────────────────────
 document.querySelectorAll('.model-card').forEach(card => {
     card.addEventListener('click', function() {
-        // Toggle active state
         document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
         this.classList.add('active');
-        // Update all hidden inputs
         const modelName = this.dataset.model;
         document.querySelectorAll('.model-name-input').forEach(input => {
             input.value = modelName;
         });
-        // Save selection
         localStorage.setItem('selectedModel', modelName);
     });
 });
 
-// Restore saved model on load
 (function() {
     const saved = localStorage.getItem('selectedModel');
     if (saved) {
@@ -272,7 +458,8 @@ document.querySelectorAll('.model-card').forEach(card => {
         if (card) {
             document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
-            card.querySelector('input[type=radio]').checked = true;
+            const radio = card.querySelector('input[type=radio]');
+            if (radio) radio.checked = true;
             document.querySelectorAll('.model-name-input').forEach(input => {
                 input.value = saved;
             });
@@ -280,3 +467,6 @@ document.querySelectorAll('.model-card').forEach(card => {
     }
 })();
 </script>
+
+</body>
+</html>
