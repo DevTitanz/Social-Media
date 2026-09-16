@@ -237,7 +237,7 @@ p {
    MINIMAL CARDS
    ============================================================ */
 .card, .minimal-card {
-    background: var(--bg-card) !important;
+    background: var(--bg-card);
     border: 1px solid var(--border-color) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-card) !important;
@@ -246,11 +246,42 @@ p {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.card:not(.bg-dark):not(.bg-primary):not(.bg-transparent):not(.media-verdict-card):not(.media-verdict-item) {
+    background: var(--bg-card) !important;
+}
+
+.card.bg-dark {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #1e293b !important;
+}
+
+[data-theme="dark"] .card.bg-dark {
+    background: #0d1321 !important;
+    border-color: var(--border-color) !important;
+}
+
 .card-header {
-    background: transparent !important;
+    background: transparent;
     border-bottom: 1px solid var(--border-color) !important;
     padding: 16px 20px !important;
     font-weight: 600;
+}
+
+.card-header.bg-dark {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-bottom-color: #1e293b !important;
+}
+
+[data-theme="dark"] .card-header.bg-dark {
+    background: #0d1321 !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.card-header.bg-primary {
+    background: var(--primary) !important;
+    color: #ffffff !important;
 }
 
 .card-body {
@@ -669,35 +700,138 @@ select.form-control {
    BADGES & PILLS
    ============================================================ */
 .badge {
-    padding: 4px 10px;
-    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
     font-weight: 600;
     border-radius: var(--radius-pill);
     letter-spacing: 0.02em;
+    line-height: 1.2;
 }
 
-.bg-success {
-    background-color: var(--sentiment-pos-bg) !important;
-    color: var(--sentiment-pos) !important;
-    border: 1px solid var(--sentiment-pos-border);
+/* Soft Pill Badges - High contrast in both light and dark themes */
+.badge.bg-success,
+.badge.text-bg-success {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    color: #047857 !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+[data-theme="dark"] .badge.bg-success,
+[data-theme="dark"] .badge.text-bg-success {
+    background-color: rgba(52, 211, 153, 0.16) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(52, 211, 153, 0.4) !important;
 }
 
-.bg-danger {
-    background-color: var(--sentiment-neg-bg) !important;
-    color: var(--sentiment-neg) !important;
-    border: 1px solid var(--sentiment-neg-border);
+.badge.bg-danger,
+.badge.text-bg-danger {
+    background-color: rgba(244, 63, 94, 0.12) !important;
+    color: #be123c !important;
+    border: 1px solid rgba(244, 63, 94, 0.35) !important;
+}
+[data-theme="dark"] .badge.bg-danger,
+[data-theme="dark"] .badge.text-bg-danger {
+    background-color: rgba(251, 113, 133, 0.16) !important;
+    color: #fb7185 !important;
+    border: 1px solid rgba(251, 113, 133, 0.4) !important;
 }
 
-.bg-warning {
-    background-color: var(--sentiment-neu-bg) !important;
-    color: var(--sentiment-neu) !important;
-    border: 1px solid var(--sentiment-neu-border);
+.badge.bg-warning,
+.badge.text-bg-warning {
+    background-color: rgba(245, 158, 11, 0.14) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+[data-theme="dark"] .badge.bg-warning,
+[data-theme="dark"] .badge.text-bg-warning {
+    background-color: rgba(251, 191, 36, 0.16) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(251, 191, 36, 0.4) !important;
 }
 
-.bg-primary {
+.badge.bg-primary,
+.badge.text-bg-primary {
     background-color: var(--primary-light) !important;
     color: var(--primary) !important;
-    border: 1px solid var(--primary-border);
+    border: 1px solid var(--primary-border) !important;
+}
+
+.badge.bg-secondary,
+.badge.text-bg-secondary {
+    background-color: var(--bg-card-subtle) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.badge.bg-dark,
+.badge.text-bg-dark {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Prominent Solid Sentiment Badges (for Predicted Sentiment & key results) */
+.badge-sentiment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 18px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.badge-sentiment.positive,
+.badge-sentiment-positive {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #ffffff !important;
+    border: 1px solid #059669 !important;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+.badge-sentiment.negative,
+.badge-sentiment-negative {
+    background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+    color: #ffffff !important;
+    border: 1px solid #e11d48 !important;
+    box-shadow: 0 2px 10px rgba(244, 63, 94, 0.35);
+}
+
+.badge-sentiment.neutral,
+.badge-sentiment-neutral {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #ffffff !important;
+    border: 1px solid #d97706 !important;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+[data-theme="dark"] .badge-sentiment.positive,
+[data-theme="dark"] .badge-sentiment-positive {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    color: #ffffff !important;
+    border: 1px solid #34d399 !important;
+    box-shadow: 0 2px 12px rgba(52, 211, 153, 0.3);
+}
+
+[data-theme="dark"] .badge-sentiment.negative,
+[data-theme="dark"] .badge-sentiment-negative {
+    background: linear-gradient(135deg, #e11d48, #be123c) !important;
+    color: #ffffff !important;
+    border: 1px solid #fb7185 !important;
+    box-shadow: 0 2px 12px rgba(251, 113, 133, 0.3);
+}
+
+[data-theme="dark"] .badge-sentiment.neutral,
+[data-theme="dark"] .badge-sentiment-neutral {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    color: #ffffff !important;
+    border: 1px solid #fbbf24 !important;
+    box-shadow: 0 2px 12px rgba(251, 191, 36, 0.3);
 }
 
 /* ============================================================
@@ -879,6 +1013,106 @@ select.form-control {
 [data-theme="dark"] .card.gradient-success {
     background: linear-gradient(145deg, #12201a, #0e1714) !important;
 }
+
+/* Media's Verdict Spotlight Cards (High-contrast in Light & Dark mode) */
+.card.media-verdict-card {
+    background: linear-gradient(145deg, #f0fdf4, #ffffff) !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    position: relative;
+}
+
+.media-verdict-card .media-verdict-overlay {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.media-verdict-heading {
+    color: var(--text-main);
+}
+
+.card.media-verdict-item {
+    background: #ffffff !important;
+    border: 1px solid var(--border-color) !important;
+    border-left: 4px solid var(--sentiment-pos) !important;
+    border-radius: 12px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card.media-verdict-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px -2px rgba(16, 185, 129, 0.15) !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    border-left-color: var(--sentiment-pos) !important;
+}
+
+.media-verdict-title {
+    color: var(--text-main) !important;
+    transition: color 0.15s ease;
+}
+
+.media-verdict-title:hover {
+    color: var(--primary) !important;
+}
+
+.media-verdict-meta {
+    color: var(--text-muted) !important;
+}
+
+.media-verdict-badge {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #047857 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .card.media-verdict-card {
+    background: linear-gradient(145deg, #0e1e17, #0b131f) !important;
+    border: 1px solid rgba(52, 211, 153, 0.25) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .media-verdict-card .media-verdict-overlay {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(0, 0, 0, 0));
+}
+
+[data-theme="dark"] .media-verdict-heading {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .card.media-verdict-item {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-left: 4px solid #34d399 !important;
+}
+
+[data-theme="dark"] .card.media-verdict-item:hover {
+    background: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+    border-color: rgba(52, 211, 153, 0.3) !important;
+    border-left-color: #34d399 !important;
+}
+
+[data-theme="dark"] .media-verdict-title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .media-verdict-title:hover {
+    color: #818cf8 !important;
+}
+
+[data-theme="dark"] .media-verdict-meta {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .media-verdict-badge {
+    background: rgba(52, 211, 153, 0.16) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(52, 211, 153, 0.35) !important;
+}
+
 
 /* Native form-control rendering: let the OS render dark widgets in dark mode */
 [data-theme="dark"] {
